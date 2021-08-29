@@ -6,10 +6,13 @@ import (
 
 const port string = ":5000" 
 
+func Router(app *fiber.App) {
+	app.Get("/article", article.getArticle)
+}
+
 func main() {
 	app := fiber.New()
-
-	app.Get("/article", article.getArticle)
+	Router(app)
 
 	app.Listen(port)
 }
