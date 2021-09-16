@@ -1,12 +1,15 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 )
 
 const port string = ":5000" 
 const dbName = "go_simple_article_db"
 const collectionName = "article"
+const mongoURI = "mongodb://localhost:27017"
 
 func Router(app *fiber.App) {
 	app.Get("/article/", GetArticle)
@@ -18,6 +21,10 @@ func Router(app *fiber.App) {
 }
 
 func main() {
+	if err := Connect(); err != nil {
+		log.Fatal(err)
+	}
+
 	app := fiber.New(fiber.Config {
 		Prefork: true,
 	})

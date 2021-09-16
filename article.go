@@ -20,11 +20,6 @@ type Article struct {
 }
 
 func GetArticle(c *fiber.Ctx)  error {
-	collection, err := getMongoDBCollection(dbName, collectionName)
-	if err != nil {
-		return c.Status(500).Send([]byte(err.Error()))
-	}
-
 	var filter bson.M = bson.M{}
 
 	if c.Params("id") != "" {
@@ -34,7 +29,7 @@ func GetArticle(c *fiber.Ctx)  error {
 	}
 
 	var results []bson.M
-	cur, err := collection.Find(context.Background(), filter)
+	cur, err := mg.Db.Collection(collectionName).Find(context.Background(), filter)
 
 	if err != nil {
 		return c.Status(500).Send([]byte(err.Error()))
@@ -53,12 +48,6 @@ func GetArticle(c *fiber.Ctx)  error {
 }
 
 func CreateArticle(c *fiber.Ctx) error {
-	collection, err := getMongoDBCollection(dbName, collectionName)
-
-	if err != nil {
-		return c.Status(500).Send([]byte(err.Error()))
-	}
-
 	var article Article 
 
 	json.Unmarshal([]byte(c.Body()), &article)
@@ -68,7 +57,7 @@ func CreateArticle(c *fiber.Ctx) error {
 	// fmt.Println(context.Background(), article)
 	article.CreatedDate = time.Now()
 
-	res, err := collection.InsertOne(context.Background(), article)
+	res, err := mg.Db.Collection(collectionName).InsertOne(context.Background(), article)
 
 	if err != nil {
 		return c.Status(500).Send([]byte(err.Error()))
@@ -81,15 +70,10 @@ func CreateArticle(c *fiber.Ctx) error {
 }
 
 func DeleteArticle (c *fiber.Ctx) error {
-	collection, err := getMongoDBCollection(dbName, collectionName)
-
-	if err != nil {
-		return c.Status(400).Send([]byte(err.Error()))
-	}
 
 	articleID, _ := primitive.ObjectIDFromHex(c.Params("id"))
 
-	res, err := collection.DeleteOne(context.Background(), bson.M{"_id": articleID})
+	res, err := mg.Db.Collection(collectionName).DeleteOne(context.Background(), bson.M{"_id": articleID})
 
 	if err != nil {
 		return c.Status(400).Send([]byte(err.Error()))
