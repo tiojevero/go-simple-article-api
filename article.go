@@ -69,6 +69,27 @@ func CreateArticle(c *fiber.Ctx) error {
 	return c.SendString(article.Title)
 }
 
+func UpdateArticle (c *fiber.Ctx) error {
+	var article Article
+
+	json.Unmarshal([]byte(c.Body()), &article)
+
+	update := bson.M {
+		"$set" : article,
+	}
+
+	objID, _ := primitive.ObjectIDFromHex(c.Params("id"))
+	res, err := mg.Db.Collection(collectionName).UpdateOne(context.Background(), bson.M{"_id": objID}, update)
+
+	if err != nil {
+		return c.SendStatus(500)
+	}
+
+	response, _ := json.Marshal(res)
+
+	return c.Send(response)
+}
+
 func DeleteArticle (c *fiber.Ctx) error {
 
 	articleID, _ := primitive.ObjectIDFromHex(c.Params("id"))
